@@ -15,51 +15,63 @@ import javafx.stage.Stage;
 
 public class Calendar1 extends Application {
     
-    LocalDate today;
+    Stage stage;
+    LocalDate d;
     String[] week = {"Sun","Mon","Tue","Wed","Thu","Fri","Sat"};
-    Label lbl1;
-    Button btn1, btn2;
+    Label lbl;
+    Button btnpre, btnnext;
     int year, month, start, day, i=0;
+    Pane sp1 = new Pane(),sp2 = new Pane();
+    HBox h1;
     GridPane grid = new GridPane();
+    Scene scene;
     
     @Override
-    public void start(Stage primaryStage) {
+    public void start(Stage stage) {
         //現在の日にちの取得
-        today = LocalDate.now();
-        //ヘッダー部
-        btn1 = new Button("Previous");
-        btn2 = new Button("   Next   ");        
-        year = today.getYear();
-        month = today.getMonthValue();
-        lbl1 = new Label(String.valueOf(year)+"年"+String.valueOf(month)+"月");
-        Pane sp1 = new Pane();
-        Pane sp2 = new Pane();
-        HBox h1 = new HBox(30,btn1,sp1,lbl1,sp2,btn2);
-        HBox.setHgrow(sp1,Priority.ALWAYS);
-        HBox.setHgrow(sp2,Priority.ALWAYS);
+        d = LocalDate.now();
+        //カレンダーの作成
+        MakeCalendar(d);
+        //ボタンの作成
+        btnpre = new Button("Previous");
+        btnnext = new Button("   Next   ");
+        Set();
+        //ボタンアクションの設定
+        btnpre.setOnAction(event ->{
+            d = d.minusMonths(1);
+            MakeCalendar(d);
+            Set();
+            stage.setScene(scene);
+        });
+        btnnext.setOnAction(event ->{
+            d = d.plusMonths(1);
+            MakeCalendar(d);
+            Set();
+            stage.setScene(scene);
+        });
+        //ステージ
+        stage.setTitle("Calendar1");
+        stage.setScene(scene);
+        stage.show();
+    }
+    
+    void MakeCalendar(LocalDate d){
+        //年月
+        year = d.getYear();
+        month = d.getMonthValue();
+        lbl = new Label(String.valueOf(year)+"年"+String.valueOf(month)+"月");
         //カレンダー部
+        grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
         grid.setHgap(30);
         grid.setVgap(30);
         //曜日の配置
+        i=0;
         for(int j=0;j<7;j++){
             Label lbday = new Label(week[j]);
             GridPane.setConstraints(lbday,j,i);
             grid.getChildren().add(lbday);
         }
-        //カレンダーの作成
-        MakeCalendar(today);
-        //配置
-        VBox v1 = new VBox(30,h1,grid);
-        VBox.setMargin(h1,new Insets(20));
-        Scene scene = new Scene(v1, 400, 400);
-        //ステージ
-        primaryStage.setTitle("Calendar1");
-        primaryStage.setScene(scene);
-        primaryStage.show();
-    }
-    
-    public void MakeCalendar(LocalDate d){
         //月初めの曜日を取得
         DayOfWeek firstday = d.withDayOfMonth(1).getDayOfWeek();
         switch(firstday){
@@ -82,6 +94,7 @@ public class Calendar1 extends Application {
         int length = d.lengthOfMonth();
         //日にちを入れる
         i=1;
+        day=0;
         for(int j=start;j<7;j++){
             Label lbday = new Label(String.valueOf(day+1));
             GridPane.setConstraints(lbday,j,i);
@@ -99,6 +112,17 @@ public class Calendar1 extends Application {
             }
             i++;
         }
+    }
+    
+    void Set(){
+        //ヘッダー部
+        h1 = new HBox(30,btnpre,sp1,lbl,sp2,btnnext);
+        HBox.setHgrow(sp1,Priority.ALWAYS);
+        HBox.setHgrow(sp2,Priority.ALWAYS);
+        //配置
+        VBox v1 = new VBox(30,h1,grid);
+        VBox.setMargin(h1,new Insets(20));
+        scene = new Scene(v1, 400, 400);
     }
     
     public static void main(String[] args) {
